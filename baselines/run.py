@@ -194,9 +194,9 @@ def parse_cmdline_kwargs(args):
 
 def configure_logger(log_path, **kwargs):
     if log_path is not None:
-        logger.configure(log_path)
+        logger.configure(log_path, format_strs=["wandb"])
     else:
-        logger.configure(**kwargs)
+        logger.configure(**kwargs, format_strs=["wandb"])
 
 
 def main(args):

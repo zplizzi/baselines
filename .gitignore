@@ -5,6 +5,8 @@
 .pytest_cache
 .DS_Store
 .idea
+.mypy_cache/
+wandb/
 
 # Setuptools distribution and build folders.
 /dist/

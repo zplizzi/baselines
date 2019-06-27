@@ -8,6 +8,7 @@ import datetime
 import tempfile
 from collections import defaultdict
 from contextlib import contextmanager
+import numpy as np
 
 DEBUG = 10
 INFO = 20
@@ -171,6 +172,25 @@ class TensorBoardOutputFormat(KVWriter):
             self.writer.Close()
             self.writer = None
 
+import wandb
+class WandbOutputFormat(KVWriter):
+    def __init__(self, dir):
+        wandb.init(project="test")
+        self.step = 1
+
+    def writekvs(self, kvs):
+        for k, v in kvs.items():
+            if type(v) in (np.ndarray, list):
+                v = np.array(v)
+                wandb.log({k: wandb.Histogram(v)}, step=self.step)
+            else:
+                wandb.log({k: v}, step=self.step)
+
+        self.step += 1
+
+    def close(self):
+        pass
+
 def make_output_format(format, ev_dir, log_suffix=''):
     os.makedirs(ev_dir, exist_ok=True)
     if format == 'stdout':
@@ -183,6 +203,8 @@ def make_output_format(format, ev_dir, log_suffix=''):
         return CSVOutputFormat(osp.join(ev_dir, 'progress%s.csv' % log_suffix))
     elif format == 'tensorboard':
         return TensorBoardOutputFormat(osp.join(ev_dir, 'tb%s' % log_suffix))
+    elif format == 'wandb':
+        return WandbOutputFormat(osp.join(ev_dir, 'tb%s' % log_suffix))
     else:
         raise ValueError('Unknown format specified: %s' % (format,))
 
